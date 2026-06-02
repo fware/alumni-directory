@@ -25,6 +25,7 @@ export default function Home() {
       const { data, error } = await supabase
         .from("businesses")
         .select("*")
+        .eq("is_approved", true) // This is the new filter!
         .order("business_name", { ascending: true });
 
       if (error) {
