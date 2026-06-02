@@ -160,7 +160,7 @@ export default function RegisterBusiness() {
           </div>
 
           {message && (
-            <div className={`p-4 rounded-lg text-sm font-medium ${error ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+            <div className={`p-4 rounded-lg text-sm font-medium ${message.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
               {message}
             </div>
           )}
