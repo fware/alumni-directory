@@ -165,7 +165,7 @@ export default function RegisterBusiness() {
       setMessage(
         editing.is_approved
           ? "Success! Your listing has been updated."
-          : "Success! Your listing was updated and will appear in the directory once an administrator approves it."
+          : "Thank you for helping grow our alumni business network! A member of the HU Alumni Club DFW board will review your submission, and your business will appear in the directory once it is approved."
       );
     } else {
       // Insert a new listing into the Supabase table
@@ -178,13 +178,13 @@ export default function RegisterBusiness() {
         setLoading(false);
         return;
       }
-      setMessage("Success! Your business was submitted and will appear in the directory once an administrator approves it.");
+      setMessage("Thank you for helping grow our alumni business network! A member of the HU Alumni Club DFW board will review your submission, and your business will appear in the directory once it is approved.");
     }
 
-    // Give the user a moment to read the success message, then redirect to the home page
+    // Give the user time to read the success message, then redirect to the home page
     setTimeout(() => {
       window.location.href = "/";
-    }, 4000);
+    }, 8000);
   };
 
   return (
