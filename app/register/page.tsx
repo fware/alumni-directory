@@ -3,6 +3,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../utils/supabase";
 
+const LOGO_BUCKET = "business-logos";
+const MAX_LOGO_BYTES = 2 * 1024 * 1024; // 2 MB, matches the bucket limit
+const LOGO_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
 export default function RegisterBusiness() {
   const [businessName, setBusinessName] = useState("");
   const [category, setCategory] = useState("");
@@ -10,6 +14,8 @@ export default function RegisterBusiness() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState("");
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,6 +35,32 @@ export default function RegisterBusiness() {
     checkUser();
   }, []);
 
+  // Free the preview's object URL when it is replaced or the page unmounts
+  useEffect(() => {
+    return () => {
+      if (logoPreview) URL.revokeObjectURL(logoPreview);
+    };
+  }, [logoPreview]);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setMessage("");
+
+    if (file && !LOGO_TYPES.includes(file.type)) {
+      setMessage("Error: Thumbnail must be a JPG, PNG, WebP, or GIF image.");
+      e.target.value = "";
+      return;
+    }
+    if (file && file.size > MAX_LOGO_BYTES) {
+      setMessage("Error: Thumbnail must be 2 MB or smaller.");
+      e.target.value = "";
+      return;
+    }
+
+    setLogoFile(file);
+    setLogoPreview(file ? URL.createObjectURL(file) : null);
+  };
+
   // 2. Handle the form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +73,23 @@ export default function RegisterBusiness() {
       return;
     }
 
+    // Upload the thumbnail first (into the user's own folder) so we can store its URL
+    let logoUrl: string | null = null;
+    if (logoFile) {
+      const ext = logoFile.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from(LOGO_BUCKET)
+        .upload(path, logoFile, { contentType: logoFile.type });
+
+      if (uploadError) {
+        setMessage(`Error uploading thumbnail: ${uploadError.message}`);
+        setLoading(false);
+        return;
+      }
+      logoUrl = supabase.storage.from(LOGO_BUCKET).getPublicUrl(path).data.publicUrl;
+    }
+
     // Insert the form data into the Supabase table
     const { error } = await supabase.from("businesses").insert([
       {
@@ -51,6 +100,7 @@ export default function RegisterBusiness() {
         phone: phone,
         email: email,
         website_url: website,
+        logo_url: logoUrl,
       },
     ]);
 
@@ -58,11 +108,11 @@ export default function RegisterBusiness() {
       setMessage(`Error: ${error.message}`);
       setLoading(false);
     } else {
-      setMessage("Success! Your business has been added to the directory.");
+      setMessage("Success! Your business was submitted and will appear in the directory once an administrator approves it.");
       // Give the user a moment to read the success message, then redirect to the home page
       setTimeout(() => {
         window.location.href = "/";
-      }, 2000);
+      }, 4000);
     }
   };
 
@@ -90,6 +140,34 @@ export default function RegisterBusiness() {
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
               />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label htmlFor="logo" className="block text-sm font-medium text-gray-700 mb-1">
+                Thumbnail (headshot or company logo)
+              </label>
+              <div className="flex items-center gap-4">
+                {logoPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- local blob preview
+                  <img
+                    src={logoPreview}
+                    alt="Thumbnail preview"
+                    className="w-16 h-16 flex-shrink-0 rounded-full object-cover border border-gray-200"
+                  />
+                ) : (
+                  <div className="w-16 h-16 flex-shrink-0 rounded-full bg-gray-100 border border-dashed border-gray-300" />
+                )}
+                <input
+                  id="logo"
+                  type="file"
+                  accept={LOGO_TYPES.join(",")}
+                  onChange={handleLogoChange}
+                  className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-semibold hover:file:bg-blue-100"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Optional. Square images work best. JPG, PNG, WebP, or GIF up to 2 MB.
+              </p>
             </div>
 
             <div className="sm:col-span-2">
