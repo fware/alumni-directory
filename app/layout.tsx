@@ -18,7 +18,7 @@ export default function RootLayout({
       <body className="bg-gray-50 min-h-screen font-sans text-gray-900">
         {/* Global Navigation Bar */}
         <nav className="bg-[#003A63] border-b-4 border-[#E51937] shadow-md sticky top-0 z-50">
-          <div className="max-w-md mx-auto sm:max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md mx-auto sm:max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
               
               {/* Brand Logo/Title */}
