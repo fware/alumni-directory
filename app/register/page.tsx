@@ -202,7 +202,7 @@ export default function RegisterBusiness() {
         {myBusinesses.length > 0 && (
           <div className="mb-8">
             <label htmlFor="listing" className="block text-sm font-medium text-gray-700 mb-1">
-              Your listings
+              Your listed businesses
             </label>
             <select
               id="listing"
@@ -232,7 +232,7 @@ export default function RegisterBusiness() {
               <input
                 type="text"
                 required
-                placeholder="e.g., WareShop Consulting, LLC"
+                placeholder="HU You Know! Inc."
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 text-gray-900"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
@@ -276,7 +276,7 @@ export default function RegisterBusiness() {
               <input
                 type="text"
                 required
-                placeholder="e.g., Technology Consulting, CPA, Medical Doctor"
+                placeholder="Examples: Nursing, Marketing, Coach, Engineer, Law"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 text-gray-900"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -289,7 +289,7 @@ export default function RegisterBusiness() {
               </label>
               <textarea
                 rows={3}
-                placeholder="Describe your services or expertise..."
+                placeholder="Describe your business."
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 text-gray-900"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
