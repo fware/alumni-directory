@@ -1,0 +1,32 @@
+Resume this session with:
+claude --resume 7b021071-54e9-487e-a901-017623b486ae
+
+
+
+
+You're welcome. All the code changes are committed. The only untracked file is SMTP_Settings_screenshot.png, which you can delete. It hides the password, so nothing sensitive is in it, but it doesn't belong in the repo.
+
+Before sending the link to the e-board:
+- Test user accounts: delete any you created, in Authentication → Users, unless you want to keep one for future testing.
+- Test listings: delete or approve them in Table Editor → businesses.
+- Web address: if you haven't yet, add huacdfw-business-directory.vercel.app in Vercel (Settings → Domains) and use it as the Site URL in Supabase (Authentication → URL Configuration).
+- Confirmation email: paste in the branded "Confirm signup" template from my last message.
+- Invitation: include the "check Spam and mark Not spam" note.
+
+Your routine once alumni start signing up: check Table Editor → businesses now and then, and set is_approved to true on new listings you've reviewed.
+
+I've saved notes on how the site is set up (Supabase, Vercel, Resend, and the approval process), so next time we can pick up without re-explaining. Good luck with the launch.
+
+
+
+
+
+After that:
+- Approval: each new business needs your approval before it appears on the directory, the same as the first one.
+- Editing: the dropdown lists all of their businesses. Choosing one loads it into the form, and pending ones are marked "(pending approval)."
+- Separate cards: each business gets its own card, with its own thumbnail, in the directory.
+- No limit: there's no cap on how many businesses one account can have.
+
+
+
+The strongest fix for the link mismatch is running the site and the emails from one domain the club owns, such as the site at directory.huacdfw.org with emails from directory@huacdfw.org. That also takes "vercel" out of the web address, which you wanted at the start. It's worth doing if the club controls huacdfw.org, but you don't need it to launch
