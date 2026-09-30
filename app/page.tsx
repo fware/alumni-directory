@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { supabase } from "../utils/supabase";
 
 // This defines the shape of our data based on your SQL table
@@ -12,7 +13,18 @@ type Business = {
   phone: string | null;
   email: string | null;
   website_url: string | null;
+  logo_url: string | null;
 };
+
+// "Ware Intelligence" -> "WI"; shown when a listing has no thumbnail
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0].toUpperCase())
+    .join("");
+}
 
 export default function Home() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
@@ -75,12 +87,32 @@ export default function Home() {
               key={business.id}
               className="bg-white p-5 rounded-xl shadow-sm border border-gray-100"
             >
-              <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-                {business.category}
-              </span>
-              <h2 className="text-xl font-bold text-gray-900 mt-1">
-                {business.business_name}
-              </h2>
+              <div className="flex items-start gap-4">
+                {business.logo_url ? (
+                  <Image
+                    src={business.logo_url}
+                    alt={`${business.business_name} logo`}
+                    width={64}
+                    height={64}
+                    className="w-16 h-16 flex-shrink-0 rounded-full object-cover border border-gray-200"
+                  />
+                ) : (
+                  <div
+                    aria-hidden="true"
+                    className="w-16 h-16 flex-shrink-0 rounded-full bg-[#003A63] text-white flex items-center justify-center text-lg font-bold"
+                  >
+                    {initials(business.business_name)}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                    {business.category}
+                  </span>
+                  <h2 className="text-xl font-bold text-gray-900 mt-1">
+                    {business.business_name}
+                  </h2>
+                </div>
+              </div>
               
               {business.description && (
                 <p className="text-gray-600 mt-2 text-sm">{business.description}</p>
