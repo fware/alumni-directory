@@ -30,7 +30,7 @@ export default function NavLinks() {
   if (loggedIn === undefined) return null;
 
   return (
-    <div className="flex space-x-2 sm:space-x-4">
+    <div className="flex flex-shrink-0 space-x-2 sm:space-x-4">
       {loggedIn ? (
         <>
           <Link href="/register" className={secondaryClass}>

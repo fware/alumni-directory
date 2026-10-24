@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { supabase } from "../../utils/supabase";
+import AlumniInfoFields, {
+  emptyAlumniInfo,
+  FIRST_GRAD_YEAR,
+  LAST_GRAD_YEAR,
+} from "../AlumniInfoFields";
 
 const MIN_PASSWORD_LENGTH = 6; // Supabase's default minimum
 
@@ -10,6 +15,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [alumniInfo, setAlumniInfo] = useState(emptyAlumniInfo);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -39,11 +45,24 @@ export default function Login() {
       showMessage("Passwords do not match. Please re-enter them.", true);
       return;
     }
+    const year = Number(alumniInfo.gradYear);
+    if (alumniInfo.gradYear && !(Number.isInteger(year) && year >= FIRST_GRAD_YEAR && year <= LAST_GRAD_YEAR)) {
+      showMessage(`Graduation Year must be between ${FIRST_GRAD_YEAR} and ${LAST_GRAD_YEAR}.`, true);
+      return;
+    }
 
     setLoading(true);
+    // The database copies these into the alum's profile when the account is created
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          major: alumniInfo.major.trim(),
+          grad_year: alumniInfo.gradYear,
+          show_on_card: alumniInfo.showOnCard,
+        },
+      },
     });
 
     if (error) showMessage(error.message, true);
@@ -156,6 +175,8 @@ export default function Login() {
               )}
             </div>
           )}
+
+          {isSignUp && <AlumniInfoFields value={alumniInfo} onChange={setAlumniInfo} />}
 
           {message && (
             <div
