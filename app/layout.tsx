@@ -22,9 +22,9 @@ export default function RootLayout({
             <div className="flex justify-between h-16 items-center">
               
               {/* Brand Logo/Title */}
-              <div className="flex-shrink-0 flex items-center">
-                <Link href="/" className="text-white font-extrabold text-lg tracking-wider">
-                  HU ALUMNI
+              <div className="flex items-center mr-2">
+                <Link href="/" className="text-white font-extrabold text-sm sm:text-lg leading-tight sm:tracking-wide">
+                  Howard University Alumni Club in DFW
                 </Link>
               </div>
 

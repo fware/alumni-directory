@@ -2,6 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "../../utils/supabase";
+import AlumniInfoFields, {
+  emptyAlumniInfo,
+  FIRST_GRAD_YEAR,
+  LAST_GRAD_YEAR,
+} from "../AlumniInfoFields";
 
 const LOGO_BUCKET = "business-logos";
 const MAX_LOGO_BYTES = 2 * 1024 * 1024; // 2 MB, matches the bucket limit
@@ -39,6 +44,7 @@ export default function RegisterBusiness() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [alumniInfo, setAlumniInfo] = useState(emptyAlumniInfo);
 
   // Fill the form from an existing listing, or clear it for a new one
   function loadIntoForm(business: Business | null) {
@@ -65,6 +71,19 @@ export default function RegisterBusiness() {
         return;
       }
       setUserId(user.id);
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("major, grad_year, show_on_card")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (profile) {
+        setAlumniInfo({
+          major: profile.major ?? "",
+          gradYear: profile.grad_year?.toString() ?? "",
+          showOnCard: profile.show_on_card,
+        });
+      }
 
       const { data, error } = await supabase
         .from("businesses")
@@ -116,6 +135,26 @@ export default function RegisterBusiness() {
 
     if (!userId) {
       setMessage("Authentication error. Please log in again.");
+      setLoading(false);
+      return;
+    }
+
+    const year = alumniInfo.gradYear ? Number(alumniInfo.gradYear) : null;
+    if (year !== null && !(Number.isInteger(year) && year >= FIRST_GRAD_YEAR && year <= LAST_GRAD_YEAR)) {
+      setMessage(`Error: Graduation Year must be between ${FIRST_GRAD_YEAR} and ${LAST_GRAD_YEAR}.`);
+      setLoading(false);
+      return;
+    }
+
+    // Save the alum's info (shared by all of their cards)
+    const { error: profileError } = await supabase.from("profiles").upsert({
+      user_id: userId,
+      major: alumniInfo.major.trim() || null,
+      grad_year: year,
+      show_on_card: alumniInfo.showOnCard,
+    });
+    if (profileError) {
+      setMessage(`Error saving your alumni info: ${profileError.message}`);
       setLoading(false);
       return;
     }
@@ -334,6 +373,14 @@ export default function RegisterBusiness() {
                 onChange={(e) => setWebsite(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="pt-6 border-t border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">Your Howard Info</h2>
+            <p className="text-xs text-gray-500 mb-4">
+              Optional. Applies to all of your listings.
+            </p>
+            <AlumniInfoFields value={alumniInfo} onChange={setAlumniInfo} />
           </div>
 
           {message && (

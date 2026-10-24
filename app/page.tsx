@@ -14,7 +14,23 @@ type Business = {
   email: string | null;
   website_url: string | null;
   logo_url: string | null;
+  user_id: string;
 };
+
+// Major and graduation year, only for alumni who chose to show them
+type Profile = {
+  user_id: string;
+  major: string | null;
+  grad_year: number | null;
+};
+
+// "Biology · Class of 2005"
+function alumniLine(profile: Profile | undefined) {
+  if (!profile) return "";
+  return [profile.major, profile.grad_year && `Class of ${profile.grad_year}`]
+    .filter(Boolean)
+    .join(" · ");
+}
 
 // "Ware Intelligence" -> "WI"; shown when a listing has no thumbnail
 function initials(name: string) {
@@ -28,6 +44,7 @@ function initials(name: string) {
 
 export default function Home() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -44,6 +61,18 @@ export default function Home() {
         console.error("Error fetching businesses:", error);
       } else {
         setBusinesses(data || []);
+      }
+
+      // Database rules return only the profiles their owners made visible
+      const { data: profileRows, error: profileError } = await supabase
+        .from("profiles")
+        .select("user_id, major, grad_year")
+        .eq("show_on_card", true);
+
+      if (profileError) {
+        console.error("Error fetching alumni info:", profileError);
+      } else {
+        setProfiles(Object.fromEntries((profileRows || []).map((p) => [p.user_id, p])));
       }
       setLoading(false);
     }
@@ -113,6 +142,11 @@ export default function Home() {
                       <h2 className="text-xl font-bold text-gray-900 mt-1 break-words">
                         {business.business_name}
                       </h2>
+                      {alumniLine(profiles[business.user_id]) && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          🎓 {alumniLine(profiles[business.user_id])}
+                        </p>
+                      )}
                     </div>
                   </div>
               
